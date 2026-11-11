@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kontakt · meinherzort</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top"><a class="logo" href="/">mein<span>herz</span>ort</a></header>
+  <main class="page">
+    <h1>Kontakt</h1>
+    <p>Frage zu einer Bestellung oder einem Wunschposter? Schreib uns, wir melden uns in der Regel innert eines Werktags.</p>
+    <form id="f" class="panel">
+      <div class="field">
+        <label for="name">Name</label><input id="name" name="name" maxlength="80">
+        <label for="email">E-Mail</label><input id="email" name="email" type="text" inputmode="email" maxlength="120" required>
+        <label for="orderId">Bestellnummer (falls vorhanden)</label><input id="orderId" name="orderId" maxlength="30" placeholder="HZ-…">
+        <label for="message">Nachricht</label><textarea id="message" name="message" rows="6" maxlength="3000" required></textarea>
+        <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+      </div>
+      <button class="buy" type="submit">Senden</button>
+      <p class="error" id="msg" hidden></p>
+    </form>
+  </main>
+  <script>
+    const f = document.getElementById('f');
+    const msg = document.getElementById('msg');
+    const p = new URLSearchParams(location.search);
+    if (p.get('o')) f.orderId.value = p.get('o');
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(f));
+      const res = await fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      msg.hidden = false;
+      msg.style.color = res.ok ? 'var(--green)' : 'var(--red)';
+      msg.textContent = res.ok ? 'Danke! Deine Nachricht ist angekommen.' : (data.error || 'Senden fehlgeschlagen.');
+      if (res.ok) f.reset();
+    });
+  </script>
+</body>
+</html>

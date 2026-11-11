@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin · meinherzort</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background: #f3f0e9; }
+    .bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 12px 14px; position: sticky; top: 0; background: #f3f0e9; z-index: 2; border-bottom: 1px solid var(--line); }
+    .bar h1 { font-size: 20px; margin: 0; }
+    .bar button, .acts button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 14px; }
+    .wrap { padding: 12px; max-width: 760px; margin: 0 auto; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 96px 1fr; gap: 12px; }
+    .card img { width: 96px; border: 1px solid var(--line); background: #faf8f2; min-height: 120px; }
+    .st { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 99px; background: #eef2f0; }
+    .st.bad { background: #fde8eb; color: #9b1028; }
+    .st.ok { background: #e3f1e5; color: #2d5a35; }
+    .meta { font-size: 13px; color: var(--muted); }
+    .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; grid-column: 1 / -1; }
+    .acts .danger { color: #9b1028; }
+    details { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+    .login { max-width: 360px; margin: 60px auto; }
+    .test { font-size: 11px; background: #fff4d6; padding: 1px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="login panel" id="login" hidden>
+    <p class="legend">Admin-Zugang</p>
+    <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password">
+    <p><button class="buy" id="go">Anmelden</button></p>
+  </div>
+  <div id="app" hidden>
+    <div class="bar"><h1>Aufträge</h1><span><button id="reload">Aktualisieren</button> <button id="logout">Abmelden</button></span></div>
+    <div class="wrap" id="list"></div>
+  </div>
+<script type="module">
+const KEY = 'meinherzort.admin';
+const $ = (id) => document.getElementById(id);
+const getTok = () => { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } };
+const setTok = (t) => { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch {} };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const BAD = ['render_failed', 'gelato_failed', 'canceled'];
+const GOOD = ['shipped', 'delivered'];
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + getTok(), 'content-type': 'application/json' } });
+  if (res.status === 401) { showLogin(); throw new Error('Nicht angemeldet'); }
+  return res;
+}
+function showLogin() { $('login').hidden = false; $('app').hidden = true; }
+
+async function load() {
+  const res = await api('/api/admin/orders');
+  const { orders, statusLabels } = await res.json();
+  $('login').hidden = true; $('app').hidden = false;
+  $('list').innerHTML = orders.length ? orders.map((o) => card(o, statusLabels)).join('') : '<p>Noch keine Aufträge.</p>';
+  for (const o of orders) if (o.hasPreview) loadPreview(o.id);
+  if (location.hash) document.getElementById('o-' + location.hash.slice(1))?.scrollIntoView();
+}
+async function loadPreview(id) {
+  const res = await api('/api/admin/preview?id=' + encodeURIComponent(id));
+  if (!res.ok) return;
+  const url = URL.createObjectURL(await res.blob());
+  const img = document.querySelector(`#o-${CSS.escape(id)} img`);
+  if (img) img.src = url;
+}
+function card(o, labels) {
+  const d = o.design || {};
+  const cls = BAD.includes(o.status) ? 'bad' : GOOD.includes(o.status) ? 'ok' : '';
+  const when = new Date(o.createdAt).toLocaleString('de-CH', { dateStyle: 'short', timeStyle: 'short' });
+  const paid = !['pending'].includes(o.status);
+  return `<div class="card" id="o-${esc(o.id)}">
+    <img alt="Vorschau">
+    <div>
+      <div><span class="st ${cls}">${esc(labels[o.status] || o.status)}</span> ${o.livemode === false ? '<span class="test">Test</span>' : ''}</div>
+      <div><strong>${esc(d.title)}</strong></div>
+      <div class="meta">${esc([d.place, d.date].filter(Boolean).join(' · '))}</div>
+      <div class="meta">${esc(o.id)} · ${when} · ${esc(d.format)}${d.frame ? ' ' + esc(d.frame) : ''} · CHF ${o.amountChf ?? ''}</div>
+      <div class="meta">${esc(o.name || '')} ${o.city ? '· ' + esc(o.city) : ''} ${o.email ? '· ' + esc(o.email) : ''}</div>
+      ${o.gelato?.id ? `<div class="meta">Gelato: ${esc(o.gelato.status || '')} ${o.gelato.type === 'draft' ? '(Entwurf, im Gelato-Dashboard freigeben)' : ''}</div>` : ''}
+      ${o.tracking?.url ? `<div class="meta"><a href="${esc(o.tracking.url)}" target="_blank">Sendung verfolgen</a></div>` : ''}
+      ${o.lastError && BAD.includes(o.status) ? `<div class="meta" style="color:#9b1028">${esc(o.lastError)}</div>` : ''}
+    </div>
+    ${paid ? `<div class="acts">
+      <button data-a="rerender" data-id="${esc(o.id)}">Neu rendern</button>
+      ${o.status === 'gelato_failed' || o.status === 'rendered' ? `<button data-a="resubmit" data-id="${esc(o.id)}">Erneut an Gelato</button>` : ''}
+      ${['submitted','in_production','shipped','delivered'].includes(o.status) ? `<button data-a="reprint" data-id="${esc(o.id)}">Nachdruck</button>` : ''}
+      ${o.status !== 'refunded' ? `<button class="danger" data-a="refund" data-id="${esc(o.id)}">Rückerstatten</button>` : ''}
+    </div>` : ''}
+    <details><summary>Verlauf</summary>${(o.log || []).map((l) => `<div>${esc(new Date(l.at).toLocaleString('de-CH'))}: ${esc(l.msg)}</div>`).join('')}</details>
+  </div>`;
+}
+const CONFIRM = {
+  rerender: 'Druckdatei neu rendern?',
+  resubmit: 'Auftrag erneut an Gelato senden?',
+  reprint: 'Nachdruck auslösen? Gelato produziert und verrechnet das Poster nochmals.',
+  refund: 'Den vollen Betrag an den Kunden zurückerstatten? Das kann nicht rückgängig gemacht werden.',
+};
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-a]');
+  if (!b) return;
+  if (!confirm(CONFIRM[b.dataset.a] || 'Ausführen?')) return;
+  b.disabled = true;
+  const res = await api('/api/admin/action', { method: 'POST', body: JSON.stringify({ id: b.dataset.id, action: b.dataset.a }) });
+  const data = await res.json().catch(() => ({}));
+  alert(res.ok ? 'Erledigt.' : 'Fehler: ' + (data.error || res.status));
+  setTimeout(load, 1500);
+});
+$('go').onclick = () => { setTok($('tok').value.trim()); load().catch(() => {}); };
+$('reload').onclick = () => load();
+$('logout').onclick = () => { setTok(''); showLogin(); };
+if (getTok()) load().catch(() => {}); else showLogin();
+</script>
+</body>
+</html>

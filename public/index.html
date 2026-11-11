@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>meinherzort · Dein Ort auf der Schweizer Landeskarte</title>
+  <meta name="description" content="Personalisiertes Kartenposter im Stil der Schweizer Landeskarte: Wo ihr euch kennengelernt habt, wo der Antrag war, wo alles begann. Gedruckt in der Schweiz.">
+  <meta property="og:title" content="meinherzort · Wo alles begann">
+  <meta property="og:description" content="Euer Ort auf der Schweizer Landeskarte, als Poster mit Herz.">
+  <link rel="preload" href="/fonts/DMSerifDisplay_400Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Inter_500Medium.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="/vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c8102e' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+  <script src="/vendor/maplibre-gl.js" defer></script>
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="logo" href="/">mein<span>herz</span>ort</a>
+    <span class="tag">Wo alles begann</span>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Euer Ort auf der Schweizer Landeskarte.</h1>
+      <p>Wo ihr euch kennengelernt habt, wo die Frage aller Fragen kam, wo ihr Ja gesagt habt: Such den Ort, setz das Herz, schreib eure Zeile. Gedruckt und geliefert in der Schweiz.</p>
+    </section>
+
+    <section class="studio" aria-label="Poster gestalten">
+      <div class="stage">
+        <div class="poster-wrap" id="posterWrap">
+          <div class="poster" id="poster">
+            <div class="mapbox" id="mapbox"><div id="map"></div></div>
+            <div class="overlay" id="overlay" aria-hidden="true"></div>
+            <div class="gesture" id="gesture" aria-label="Kartenausschnitt verschieben und zoomen. Tippen setzt das Herz."></div>
+            <div class="loading" id="loading">Karte lädt …</div>
+          </div>
+          <div class="map-tools">
+            <button type="button" id="zoomIn" aria-label="Hineinzoomen">+</button>
+            <button type="button" id="zoomOut" aria-label="Herauszoomen">−</button>
+            <button type="button" id="centerHeart">Aufs Herz zentrieren</button>
+          </div>
+          <p class="hint">Karte mit dem Finger verschieben, mit zwei Fingern zoomen. <strong>Tippen setzt das Herz.</strong></p>
+        </div>
+      </div>
+
+      <form class="panel" id="form" autocomplete="off" novalidate>
+        <div class="field search">
+          <label for="search">1. Ort suchen</label>
+          <input id="search" type="search" placeholder="Adresse, Ort oder Berg, z. B. «Rigi Kulm»" enterkeyhint="search">
+          <ul class="results" id="results" role="listbox" hidden></ul>
+        </div>
+
+        <fieldset class="field">
+          <legend>2. Eure Zeilen</legend>
+          <label for="title">Titel</label>
+          <input id="title" maxlength="32" value="Wo alles begann">
+          <label for="place">Ort</label>
+          <input id="place" maxlength="40" placeholder="z. B. Wallbach AG">
+          <label for="date">Datum oder Anlass</label>
+          <input id="date" maxlength="30" placeholder="z. B. 14. Februar 2019">
+          <div class="radio-row" role="radiogroup" aria-label="Koordinaten">
+            <span class="mini">Koordinaten:</span>
+            <label><input type="radio" name="coordStyle" value="wgs" checked> Grad</label>
+            <label><input type="radio" name="coordStyle" value="lv95"> Schweizer (LV95)</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>3. Format</legend>
+          <div class="formats" id="formats"></div>
+          <div class="frames" id="frames"></div>
+        </fieldset>
+
+        <div class="field approve">
+          <p class="legend">4. Bitte genau prüfen</p>
+          <div class="proof" id="proof"></div>
+          <label class="check">
+            <input type="checkbox" id="approved">
+            <span>Ich habe Text, Datum, Herz und Kartenausschnitt geprüft. Das Poster wird genau so gedruckt. Personalisierte Ware ist vom Umtausch ausgeschlossen (<a href="/agb.html" target="_blank">AGB</a>).</span>
+          </label>
+          <button type="submit" class="buy" id="buy" disabled>Zur Kasse</button>
+          <p class="error" id="error" role="alert" hidden></p>
+          <p class="fine">Bezahlen mit TWINT oder Karte. Versand in der Schweiz inklusive. Gedruckt von unserem Druckpartner, meist in der Schweiz.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="why">
+      <div><h2>Echte Landeskarte</h2><p>Die Karte stammt von swisstopo, dem Bundesamt für Landestopografie. Jeder Weg, jeder Wald, jeder Flurname.</p></div>
+      <div><h2>Auf Schweizerdeutsch, wenn ihr wollt</h2><p>Eure Zeilen, eure Sprache. «Hie hets agfange» passt genauso wie «Wo alles begann».</p></div>
+      <div><h2>Schweizer Koordinaten</h2><p>Auf Wunsch mit LV95-Koordinaten wie auf der Landeskarte. Für alle, die wissen, was 2'600'000 bedeutet.</p></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Kartengrundlage © swisstopo</p>
+    <nav><a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/agb.html">AGB</a> · <a href="/datenschutz.html">Datenschutz</a></nav>
+  </footer>
+</body>
+</html>

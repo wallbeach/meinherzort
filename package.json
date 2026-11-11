@@ -1,0 +1,32 @@
+{
+  "name": "meinherzort",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test scripts/core.test.mjs",
+    "render:test": "node scripts/test-render.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wallbeach/meinherzort.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wallbeach/meinherzort/issues"
+  },
+  "homepage": "https://github.com/wallbeach/meinherzort#readme",
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.9",
+    "opentype.js": "^2.0.0",
+    "sharp": "^0.35.5",
+    "stripe": "^23.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,27 @@
+[build]
+  publish = "public"
+  command = "npm test"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["sharp"]
+  # Schriften werden fürs Druck-Rendering auf dem Server gebraucht
+  included_files = ["public/fonts/**"]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

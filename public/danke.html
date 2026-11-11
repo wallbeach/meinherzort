@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Danke · meinherzort</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top"><a class="logo" href="/">mein<span>herz</span>ort</a></header>
+  <main class="page">
+    <h1>Danke für deine Bestellung!</h1>
+    <p>Wir bereiten jetzt die Druckdatei vor und geben dein Poster in den Druck. Eine Bestätigung mit Vorschau kommt in den nächsten Minuten per E-Mail.</p>
+    <p>Sobald das Poster unterwegs ist, bekommst du eine zweite Mail mit der Sendungsverfolgung.</p>
+    <p id="ref"></p>
+    <p>Fragen? <a href="/kontakt.html">Schreib uns</a>.</p>
+    <p><a href="/">Noch ein Poster gestalten</a></p>
+  </main>
+  <script>
+    const o = new URLSearchParams(location.search).get('o');
+    if (o && /^HZ-[\w-]+$/.test(o)) document.getElementById('ref').textContent = 'Deine Bestellnummer: ' + o;
+  </script>
+</body>
+</html>
