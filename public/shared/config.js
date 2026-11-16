@@ -16,7 +16,7 @@ export const FORMATS = {
     short: '30×40 gerahmt',
     widthMm: 300,
     heightMm: 400,
-    priceChf: 79,
+    priceChf: 89,
     frames: {
       natur: 'Holz natur',
       schwarz: 'Schwarz',
@@ -29,7 +29,7 @@ export const FORMATS = {
     short: '50×70 Poster',
     widthMm: 500,
     heightMm: 700,
-    priceChf: 49,
+    priceChf: 59,
     frames: null,
     defaultFrame: null,
   },
