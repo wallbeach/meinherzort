@@ -34,8 +34,8 @@ export async function applyGelatoUpdate(orderId, ev) {
 
   if ((updated.status === 'shipped' || updated.status === 'delivered') && updated.tracking && !updated.mails?.shipping) {
     try {
-      await sendShippingMail(updated);
-      updated = await updateOrder(orderId, { mails: { ...(updated.mails || {}), shipping: new Date().toISOString() } }, 'Versandmail gesendet');
+      const res = await sendShippingMail(updated);
+      if (!res?.skipped) updated = await updateOrder(orderId, { mails: { ...(updated.mails || {}), shipping: new Date().toISOString() } }, 'Versandmail gesendet');
     } catch (e) {
       await notify('Mailfehler', `${orderId}: ${e.message}`, { orderId, priority: 'default' });
     }

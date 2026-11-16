@@ -65,7 +65,8 @@ export async function confirmStep(orderId) {
   const order = await getOrder(orderId);
   if (order.mails?.confirmation) return order;
   try {
-    await sendOrderConfirmation(order);
+    const res = await sendOrderConfirmation(order);
+    if (res?.skipped) return updateOrder(order.id, {}, 'Bestätigungsmail übersprungen (Brevo nicht eingerichtet)');
     return updateOrder(order.id, { mails: { ...(order.mails || {}), confirmation: new Date().toISOString() } }, 'Bestätigungsmail gesendet');
   } catch (e) {
     await notify('Mailfehler', `${order.id}: ${e.message}`, { orderId: order.id, priority: 'default' });
