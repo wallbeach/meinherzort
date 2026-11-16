@@ -5,7 +5,7 @@
 // Für den Live-Betrieb GELATO_ORDER_TYPE=order setzen.
 import { env } from './util.js';
 
-const ORDERS = 'https://order.gelato.com/v4/orders';
+const ORDERS = 'https://order.gelatoapis.com/v4/orders';
 
 function headers() {
   return { 'content-type': 'application/json', 'X-API-KEY': env('GELATO_API_KEY') };

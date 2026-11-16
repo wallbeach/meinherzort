@@ -18,7 +18,7 @@ const body = {
   },
   products: [{ itemReferenceId: 'i1', productUid, files: [{ type: 'default', url: 'https://example.com/x.jpg' }], quantity: 1 }],
 };
-const r = await fetch('https://order.gelato.com/v4/orders:quote', {
+const r = await fetch('https://order.gelatoapis.com/v4/orders:quote', {
   method: 'POST',
   headers: { 'X-API-KEY': KEY, 'content-type': 'application/json' },
   body: JSON.stringify(body),

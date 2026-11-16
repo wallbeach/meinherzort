@@ -19,7 +19,7 @@ const post = async (u, b) => {
   return r.json();
 };
 
-const catalogs = await get('https://product.gelato.com/v3/catalogs');
+const catalogs = await get('https://product.gelatoapis.com/v3/catalogs');
 const list = catalogs.data || catalogs;
 console.log('Kataloge:', list.map((c) => c.catalogUid).join(', '));
 
@@ -33,7 +33,7 @@ for (const w of wanted) {
     let offset = 0;
     const hits = [];
     for (;;) {
-      const res = await post(`https://product.gelato.com/v3/catalogs/${c.catalogUid}/products:search`, { limit: 100, offset });
+      const res = await post(`https://product.gelatoapis.com/v3/catalogs/${c.catalogUid}/products:search`, { limit: 100, offset });
       const products = res.products || [];
       for (const p of products) if (w.size.test(p.productUid)) hits.push(p.productUid);
       if (products.length < 100) break;
@@ -43,7 +43,7 @@ for (const w of wanted) {
     for (const uid of hits.slice(0, 40)) {
       let price = '';
       try {
-        const pr = await get(`https://product.gelato.com/v3/products/${uid}/prices?country=CH&currency=CHF`);
+        const pr = await get(`https://product.gelatoapis.com/v3/products/${uid}/prices?country=CH&currency=CHF`);
         const first = (Array.isArray(pr) ? pr : pr.data || [])[0];
         if (first) price = `CHF ${first.price} (ab Menge ${first.quantity})`;
       } catch (e) {
